@@ -513,6 +513,7 @@ window.kirimData = async function() {
   if(!nama || !lat || !lon) return showToast("Mohon isi semua kolom!");
   document.getElementById("btnSimpan").innerText = "Proses...";
   try {
+    const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${weatherKey}&units=metric`;
     const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${weatherKey}&units=metric`);
     const data = await res.json();
     const fullAddress = await getAddressFromCoords(lat, lon);
@@ -521,6 +522,7 @@ window.kirimData = async function() {
     const customID = `PJU ${nextNum}`;
     
     await set(ref(db, "panelPJU/" + customID), {
+      link_api: weatherApiUrl,
       id_panel: customID, nama_panel: nama, latitude: lat, longitude: lon, alamat_detail: fullAddress,
       cuaca_id: data.weather?.[0]?.id || 800, cuaca: data.weather?.[0]?.main || 'Clear', suhu: Math.round(data.main?.temp || 0),
       jarak_pandang: data.visibility || 10000, awan: data.clouds?.all || 0, status_panel: "MATI", mode: "OTOMATIS",

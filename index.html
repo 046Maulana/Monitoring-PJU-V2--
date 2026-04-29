@@ -519,7 +519,7 @@ window.kirimData = async function() {
     const fullAddress = await getAddressFromCoords(lat, lon);
     const snap = await get(ref(db, "panelPJU"));
     let nextNum = 1; if(snap.exists()) nextNum = Object.keys(snap.val()).length + 1;
-    const customID = `PJU ${nextNum}`;
+    const customID = `PJU${nextNum}`;
     
     await set(ref(db, "panelPJU/" + customID), {
       link_api: weatherApiUrl,

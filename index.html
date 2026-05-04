@@ -409,7 +409,10 @@ function getWeatherVisualById(weatherId) {
 
 async function getAddressFromCoords(lat, lng) {
   try {
-    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`;
+    // Pastikan menggunakan titik sebagai pemisah desimal
+    const cleanLat = String(lat).replace(',', '.');
+    const cleanLng = String(lng).replace(',', '.');
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${cleanLat}&lon=${cleanLng}&zoom=18&addressdetails=1`;
     const response = await fetch(url, { headers: { 'Accept-Language': 'id-ID' } });
     const data = await response.json();
     if (data && data.address) {
@@ -455,7 +458,11 @@ function listenFirebase() {
         allPanelData.forEach(({id, val}) => {
             const isPanelOn = val.status_panel === "NYALA";
             total++; if(isPanelOn) on++;
-            const pos = { lat: parseFloat(val.latitude), lng: parseFloat(val.longitude) };
+            // Pembersihan string koordinat dari koma sebelum parsing
+            const cleanLat = String(val.latitude).replace(',', '.');
+            const cleanLng = String(val.longitude).replace(',', '.');
+            const pos = { lat: parseFloat(cleanLat), lng: parseFloat(cleanLng) };
+            
             if(!isNaN(pos.lat) && !isNaN(pos.lng)) {
                 validCoords++;
                 bounds.extend(pos);
@@ -509,12 +516,17 @@ window.filterPanels = () => {
 
 window.kirimData = async function() {
   const nama = document.getElementById("namaPanel").value;
-  const lat = document.getElementById("lat").value; const lon = document.getElementById("lon").value;
+  // Pastikan input koordinat menggunakan titik untuk proses API
+  const rawLat = document.getElementById("lat").value; 
+  const rawLon = document.getElementById("lon").value;
+  const lat = rawLat.replace(',', '.');
+  const lon = rawLon.replace(',', '.');
+
   if(!nama || !lat || !lon) return showToast("Mohon isi semua kolom!");
   document.getElementById("btnSimpan").innerText = "Proses...";
   try {
     const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${weatherKey}&units=metric`;
-    const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${weatherKey}&units=metric`);
+    const res = await fetch(weatherApiUrl);
     const data = await res.json();
     const fullAddress = await getAddressFromCoords(lat, lon);
     const snap = await get(ref(db, "panelPJU"));
@@ -569,7 +581,7 @@ function renderList(filteredData) {
         <button class="mode-btn ${!isAuto ? 'active' : ''}" onclick="setMode('${id}', 'MANUAL')">MANUAL</button>
       </div>
 
-      <div class="coordinate-box" onclick="map.setCenter({lat:${val.latitude}, lng:${val.longitude}}); map.setZoom(17);" style="cursor:pointer">
+      <div class="coordinate-box" onclick="map.setCenter({lat:${String(val.latitude).replace(',', '.')}, lng:${String(val.longitude).replace(',', '.')}}); map.setZoom(17);" style="cursor:pointer">
         <div class="coord-values"><span><b>LAT</b> ${val.latitude}</span><span><b>LON</b> ${val.longitude}</span></div>
         <div class="address-box">
           <svg style="display:inline; margin-bottom:-1px; margin-right:2px" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>

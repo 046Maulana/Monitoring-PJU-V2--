@@ -23,13 +23,14 @@
       --warning: #f59e0b;
       --radius-lg: 24px;
       --radius-md: 16px;
-      /* Weather Colors */
-      --bg-clear: #fef3c7;    
-      --bg-clouds: #e2e8f0;   
-      --bg-rain: #bae6fd;     
-      --bg-storm: #c7d2fe;    
-      --bg-fog: #f1f5f9;      
-      --bg-drizzle: #ccf1ff;  
+      
+      /* Weather Colors Updated for better visual feedback */
+      --bg-clear: #fff7ed;    
+      --bg-clouds: #f1f5f9;   
+      --bg-rain: #e0f2fe;     
+      --bg-storm: #e0e7ff;    
+      --bg-fog: #f8fafc;      
+      --bg-drizzle: #f0f9ff;  
     }
 
     * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
@@ -258,6 +259,7 @@
     .status-on .btn-main { background: var(--text-dark); color: white; border: none; }
     .btn-danger { background: #fee2e2; color: var(--danger); width: 38px; flex: none; display: flex; align-items: center; justify-content: center; }
 
+    /* Weather Classes Mapping */
     .card-clear { background-color: var(--bg-clear); }
     .card-clouds { background-color: var(--bg-clouds); }
     .card-rain { background-color: var(--bg-rain); }
@@ -375,41 +377,81 @@ let markers = {};
 let allPanelData = [];
 let initialBoundsSet = false;
 
-// Fungsi Visual Cuaca Detail dengan ID dan Deskripsi
+// Fungsi Visual Cuaca Detail dengan Mapping ID Lengkap (Jawa Timur / Indonesia Context)
 function getWeatherVisualById(weatherId) {
-    if (weatherId == 800) {
-        return { label: 'Cerah', meaning: 'Langit Terang', class: 'card-clear', icon: `<svg class="bg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>` };
+    const id = parseInt(weatherId);
+    
+    // Icons
+    const iconSun = `<svg class="bg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+    const iconStorm = `<svg class="bg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 11h-1.26a8 8 0 1 0-11.62 9"/><polyline points="13 11 9 17 15 17 11 23"/></svg>`;
+    const iconRain = `<svg class="bg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 13v8M8 13v8M12 15v8M20 16.58A5 5 0 0 0 18 10h-1.26A8 8 0 1 0 4 15.25"/></svg>`;
+    const iconCloud = `<svg class="bg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>`;
+    const iconFog = `<svg class="bg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="9" y1="16" x2="15" y2="16"/></svg>`;
+    const iconDrizzle = `<svg class="bg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 19l2 2m4-2l2 2m-4-6l2 2m0-6l2 2M20 16.58A5 5 0 0 0 18 10h-1.26A8 8 0 1 0 4 15.25"/></svg>`;
+
+    // 1. Thunderstorm (200 - 232)
+    if (id >= 200 && id < 300) {
+        let desc = "Petir";
+        if (id == 200) desc = "Petir + Hujan Ringan";
+        if (id == 201) desc = "Petir + Hujan";
+        if (id == 202) desc = "Petir + Hujan Lebat";
+        if (id == 210) desc = "Petir Ringan";
+        if (id == 211) desc = "Petir (Thunderstorm)";
+        if (id == 230) desc = "Petir + Gerimis Ringan";
+        return { label: 'Thunderstorm', meaning: desc, class: 'card-thunderstorm', icon: iconStorm };
     }
-    if (weatherId >= 200 && weatherId < 300) {
-        return { label: 'Badai', meaning: 'Hujan & Petir', class: 'card-thunderstorm', icon: `<svg class="bg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 11h-1.26a8 8 0 1 0-11.62 9"/><polyline points="13 11 9 17 15 17 11 23"/></svg>` };
+
+    // 2. Drizzle (300 - 321)
+    if (id >= 300 && id < 400) {
+        let desc = "Gerimis";
+        if (id == 300) desc = "Gerimis Ringan";
+        if (id == 301) desc = "Gerimis Sedang";
+        if (id == 310) desc = "Gerimis Ringan (Drizzle)";
+        if (id == 311) desc = "Hujan Gerimis";
+        return { label: 'Drizzle', meaning: desc, class: 'card-drizzle', icon: iconDrizzle };
     }
-    if (weatherId >= 300 && weatherId < 400) {
-        return { label: 'Gerimis', meaning: 'Hujan Sangat Ringan', class: 'card-drizzle', icon: `<svg class="bg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 19l2 2m4-2l2 2m-4-6l2 2m0-6l2 2M20 16.58A5 5 0 0 0 18 10h-1.26A8 8 0 1 0 4 15.25"/></svg>` };
+
+    // 3. Rain (500 - 531)
+    if (id >= 500 && id < 600) {
+        let desc = "Hujan";
+        if (id == 500) desc = "Hujan Ringan";
+        if (id == 501) desc = "Hujan Sedang";
+        if (id == 502) desc = "Hujan Lebat";
+        if (id == 503) desc = "Hujan Sangat Lebat";
+        if (id >= 520 && id <= 522) desc = "Hujan Gerimis / Shower";
+        return { label: 'Rain', meaning: desc, class: 'card-rain', icon: iconRain };
     }
-    if (weatherId >= 500 && weatherId < 600) {
-        let label = 'Hujan';
-        let meaning = 'Hujan Sedang-Lebat';
-        if (weatherId < 510) { label = 'Hujan Ringan'; meaning = 'Tetesan Air'; }
-        return { label: label, meaning: meaning, class: 'card-rain', icon: `<svg class="bg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 13v8M8 13v8M12 15v8M20 16.58A5 5 0 0 0 18 10h-1.26A8 8 0 1 0 4 15.25"/></svg>` };
+
+    // 4. Atmosphere (700 - 781)
+    if (id >= 700 && id < 800) {
+        let desc = "Atmosferik";
+        if (id == 701) desc = "Kabut Tipis (Mist)";
+        if (id == 721) desc = "Kabut Polusi (Haze)";
+        if (id == 741) desc = "Kabut Tebal (Fog)";
+        if (id == 761) desc = "Debu Ringan (Dust)";
+        return { label: 'Atmosphere', meaning: desc, class: 'card-atmosphere', icon: iconFog };
     }
-    if (weatherId >= 700 && weatherId < 800) {
-        let meaning = 'Jarak Pandang Rendah';
-        if (weatherId == 701) meaning = 'Kabut Tipis (Mist)';
-        if (weatherId == 741) meaning = 'Kabut Tebal (Fog)';
-        return { label: 'Atmosferik', meaning: meaning, class: 'card-atmosphere', icon: `<svg class="bg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="9" y1="16" x2="15" y2="16"/></svg>` };
+
+    // 5. Clear (800)
+    if (id == 800) {
+        return { label: 'Clear', meaning: "Langit Cerah", class: 'card-clear', icon: iconSun };
     }
-    if (weatherId > 800 && weatherId < 900) {
-        let meaning = 'Berawan';
-        if (weatherId == 801) meaning = 'Sedikit Berawan';
-        if (weatherId == 804) meaning = 'Sangat Mendung';
-        return { label: 'Berawan', meaning: meaning, class: 'card-clouds', icon: `<svg class="bg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>` };
+
+    // 6. Clouds (801 - 804)
+    if (id > 800 && id < 900) {
+        let desc = "Berawan";
+        if (id == 801) desc = "Sedikit Berawan";
+        if (id == 802) desc = "Awan Tersebar";
+        if (id == 803) desc = "Awan Pecah";
+        if (id == 804) desc = "Mendung (Overcast)";
+        return { label: 'Clouds', meaning: desc, class: 'card-clouds', icon: iconCloud };
     }
-    return { label: 'Normal', meaning: 'Kondisi Standar', class: 'card-clouds', icon: `<svg class="bg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>` };
+
+    return { label: 'Normal', meaning: "Kondisi Standar", class: 'card-clouds', icon: iconCloud };
 }
 
 async function getAddressFromCoords(lat, lng) {
   try {
-    // Pastikan menggunakan titik sebagai pemisah desimal
     const cleanLat = String(lat).replace(',', '.');
     const cleanLng = String(lng).replace(',', '.');
     const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${cleanLat}&lon=${cleanLng}&zoom=18&addressdetails=1`;
@@ -449,7 +491,11 @@ function listenFirebase() {
         document.getElementById("last-sync-time").innerText = "Sync: " + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
         if(!snapshot.exists()) { allPanelData = []; renderList([]); updateStats(0, 0); return; }
         allPanelData = Object.entries(snapshot.val()).map(([id, val]) => ({ id, val }))
-            .sort((a,b) => parseInt(a.id.split(' ')[1]) - parseInt(b.id.split(' ')[1]));
+            .sort((a,b) => {
+                const numA = parseInt(a.id.replace(/\D/g, '')) || 0;
+                const numB = parseInt(b.id.replace(/\D/g, '')) || 0;
+                return numA - numB;
+            });
         
         let total = 0, on = 0;
         const bounds = new google.maps.LatLngBounds();
@@ -458,7 +504,6 @@ function listenFirebase() {
         allPanelData.forEach(({id, val}) => {
             const isPanelOn = val.status_panel === "NYALA";
             total++; if(isPanelOn) on++;
-            // Pembersihan string koordinat dari koma sebelum parsing
             const cleanLat = String(val.latitude).replace(',', '.');
             const cleanLng = String(val.longitude).replace(',', '.');
             const pos = { lat: parseFloat(cleanLat), lng: parseFloat(cleanLng) };
@@ -516,7 +561,6 @@ window.filterPanels = () => {
 
 window.kirimData = async function() {
   const nama = document.getElementById("namaPanel").value;
-  // Pastikan input koordinat menggunakan titik untuk proses API
   const rawLat = document.getElementById("lat").value; 
   const rawLon = document.getElementById("lon").value;
   const lat = rawLat.replace(',', '.');
@@ -536,8 +580,14 @@ window.kirimData = async function() {
     await set(ref(db, "panelPJU/" + customID), {
       link_api: weatherApiUrl,
       id_panel: customID, nama_panel: nama, latitude: lat, longitude: lon, alamat_detail: fullAddress,
-      cuaca_id: data.weather?.[0]?.id || 800, cuaca: data.weather?.[0]?.main || 'Clear', suhu: Math.round(data.main?.temp || 0),
-      jarak_pandang: data.visibility || 10000, awan: data.clouds?.all || 0, status_panel: "MATI", mode: "OTOMATIS",
+      cuaca_id: data.weather?.[0]?.id || 800, 
+      cuaca: data.weather?.[0]?.main || 'Clear', 
+      suhu: Math.round(data.main?.temp || 0),
+      jarak_pandang: data.visibility || 10000, 
+      awan: data.clouds?.all || 0, 
+      status_panel: "MATI", mode: "OTOMATIS",
+      sunrise: new Date((data.sys?.sunrise || 0) * 1000).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}),
+      sunset: new Date((data.sys?.sunset || 0) * 1000).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}),
       update_terakhir: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
     });
     toggleModal(false); initialBoundsSet = false; showToast(`${customID} terdaftar.`);
@@ -560,7 +610,6 @@ function renderList(filteredData) {
     const visual = getWeatherVisualById(weatherId);
     const visibilityKm = ((val.jarak_pandang || 0) / 1000).toFixed(1);
     
-    // Ikon SVG untuk Sensor LDR dan Waktu
     const ldrIcon = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42l15.72 15.72M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`;
     const timeIcon = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
 
@@ -596,11 +645,11 @@ function renderList(filteredData) {
         </div>
         <div class="data-box">
             <span class="data-label">${ldrIcon} SENSOR LDR</span>
-            <span class="data-value">${val.ldr || 0} <span class="data-subvalue">Lux/Nilai</span></span>
+            <span class="data-value">${val.ldr || 0} <span class="data-subvalue">Lux</span></span>
         </div>
         <div class="data-box">
             <span class="data-label">${timeIcon} MATAHARI</span>
-            <span class="data-value" style="font-size: 9px;">↑ ${val.sunrise || '--:--'} | ↓ ${val.sunset || '--:--'}</span>
+            <span class="data-value" style="font-size: 8px;">↑ ${val.sunrise || '--:--'} | ↓ ${val.sunset || '--:--'}</span>
         </div>
         <div class="data-box">
             <span class="data-label">VISIBILITY</span>
